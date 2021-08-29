@@ -68,6 +68,7 @@ export default LoginScreen = ({ navigation }) => {
                             placeholder='Email'
                             style={styles.textInput}
                             onChangeText={value => setEmail(value)}
+                            keyboardType = 'email-address'
                         />
                     </View>
                     <View style={styles.itemInput}>

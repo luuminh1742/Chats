@@ -38,24 +38,25 @@ export default FriendsScreen = (props) => {
             <ItemFriend
                 fullName={item.fullName}
                 avatar={item.avatar}
-                pressChat={() => pressTabChat(item.key, item.fullName, item.avatar)}
+                pressChat={() => {
+                    if(item.key === userId){
+                        Alert.alert(
+                            'Info',
+                            'This account you are using',
+                            [
+                                { text:'OK',cancelable: true}
+                            ]
+                        );
+                    }else
+                        pressTabChat(item.key, item.fullName, item.avatar)
+                }}
             />
 
         );
     }
 
-    const getDataFromFirebase = () => {
-        // const myData = [];
-        // database.on('child_added', (data) =>
-        //     myData.push()
-        // );
-    }
 
-
-    const pressReloadHandler = () => {
-
-        setDataContact([]);
-    }
+   
     const pressSearchHandler = () => {
         const myData = [];
         database.orderByChild('email').equalTo(email.trim())
@@ -89,6 +90,7 @@ export default FriendsScreen = (props) => {
                     style={styles.textInputSearch}
                     placeholder="Search friends by email"
                     onChangeText={value => setEmail(value)}
+                    keyboardType = 'email-address'
                 />
             </View>
 

@@ -51,11 +51,6 @@ export default ProfileScreen = ({ navigation }) => {
 
     useEffect(() => {
         getInfoUser();
-        //setUser(getInfoUser());
-        //setUser(getInfoUser());
-        //setUser();
-        console.log(user);
-        //console.log(getInfoUser());\
     }, [])
 
 

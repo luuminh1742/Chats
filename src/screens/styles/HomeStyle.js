@@ -55,10 +55,10 @@ const HomeStyle = StyleSheet.create({
 
     viewGroups: {
         height: 100,
-        borderRadius: 25,
+        borderRadius: 22,
         backgroundColor: '#fff',
         position: 'relative',
-        top: -65,
+        top: -45,
         width: '100%',
         justifyContent: 'center',
     },
@@ -67,7 +67,7 @@ const HomeStyle = StyleSheet.create({
         fontWeight: 'bold',
         fontSize:20,
         marginLeft:10,
-        top:-30
+        top:-15
     },
     viewFriends: {
         marginTop:25,
@@ -94,9 +94,9 @@ const HomeStyle = StyleSheet.create({
 
     //----- View History Chats ------------
     textHistoryMessage:{
-        fontSize:25,
+        fontSize:20,
         fontWeight: 'bold',
-        top:-10
+        //top:-10
     },
     viewHistoryChats: {
         padding: 10,

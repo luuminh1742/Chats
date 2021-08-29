@@ -7,14 +7,16 @@ import firebaseApp from '../components/FirebaseConfig';
 
 const styles = HomeStyle;
 
-const HomeScreen = (props) => {
-
+const HomeScreen = ({navigation}) => {
+    let componentMounted = true;
     const [user, setUser] = useState({});
     const userId = firebaseApp.auth().currentUser.uid;
     const database = firebaseApp.database().ref('Users');
-
+    const [keyFriends, setKeyFriends] = useState([]);
     const [dataGroupsMessage, setDataGroupsMessage] = useState([]);
     const [avatar, setAvatar] = useState('https://bitly.com.vn/ts8y3u');
+    const [dataContact, setDataContact] = useState([]);
+
     const renderItemContact = ({ item }) => {
         return (
             <Image
@@ -24,11 +26,11 @@ const HomeScreen = (props) => {
         );
     }
     const pressMoveToFriends = () => {
-        props.navigation.navigate('Friends');
+        navigation.navigate('Friends');
     }
 
     const pressTabChat = (key, fullName, avatar) => {
-        props.navigation.navigate('Chat',
+        navigation.navigate('Chat',
             {
                 myKey: userId,
                 keyFriend: key,
@@ -47,19 +49,8 @@ const HomeScreen = (props) => {
         );
     }
 
-    const pressMoveToFindNewFriends = () => {
-        //props.navigation.navigate('Find New Friends');
-    }
+    
 
-    const getKeyFriends = () => {
-        const keyUserFriend = [];
-        database.child(userId).child('messages')
-            .on('child_added', (data) => {
-                keyUserFriend.push(data.key);
-            }
-            );
-        return keyUserFriend;
-    }
 
 
 
@@ -75,40 +66,65 @@ const HomeScreen = (props) => {
         });
     }
 
+    const getKeyFriends = () => {
+        //const keyUserFriend = [];
+        database.child(userId).child('messages')
+            .on('value', (snapshot) => {
+                //let keyUserFriend = Object.keys(snapshot.val());
+                setKeyFriends(Object.keys(snapshot.val()));
+                //keyUserFriend.push(data.key);
+            }
+            );
+        //console.log('keyFriends: '+keyFriends);
+        //return keyUserFriend;
+    }
 
 
     const getListFriend = () => {
-        let keyFriends = getKeyFriends();
-        if (keyFriends.length === 0) return [];
-        let result = [];
-        let tmp = [];
-        database.on('child_added', (data) =>
-            tmp.push(
-                {
-                    key: data.key,
-                    fullName: data.val().fullName,
-                    avatar: data.val().avatar
-                }
-            )
-        );
-        tmp.forEach((item) => {
-            if (keyFriends.includes(item.key)) {
-                result.push(item);
-            }
-        })
-        //setDataContact(result);
-        return result;
+        //let keyFriends = getKeyFriends();
+
+
+        //getKeyFriends();
+        database.child(userId).child('messages')
+            .on('value', (snapshot) => {
+                let keyUserFriend = Object.keys(snapshot.val());
+
+                database.on('value', (data) => {
+                    let dataTmp = [];
+                    for (let [key, value] of Object.entries(data.val())) {
+
+                        if (keyUserFriend.includes(key)) {
+                            dataTmp.push({
+                                key: key,
+                                fullName: value.fullName,
+                                avatar: value.avatar
+                            });
+
+                        }
+
+                    }
+                    setDataContact(dataTmp);
+
+                });
+            });
+
     }
 
-    //const [keyFriends, setKeyFriends] = useState(getKeyFriends());
-    const [dataContact, setDataContact] = useState(getListFriend());
+
+
     useEffect(() => {
-        setDataContact(getListFriend());
-        getInfoUser();
+        if (componentMounted) {
+            getInfoUser();
+            getListFriend();
+        }
+        return () => {
+            componentMounted = false;
+        }
+
     }, [])
 
     const pressMoveToProfile = () => {
-        props.navigation.navigate('Profile');
+        navigation.navigate('Profile');
     }
 
     return (
@@ -170,7 +186,6 @@ const HomeScreen = (props) => {
                     <View style={styles.viewFriends}>
                         <TouchableOpacity
                             style={styles.touchableAddNewFriend}
-                            onPress={pressMoveToFindNewFriends}
                         >
                             <Icon
                                 name='plus'

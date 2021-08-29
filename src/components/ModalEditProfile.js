@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Modal,
     StyleSheet,
@@ -8,15 +8,30 @@ import {
     TextInput,
     Image,
     ScrollView,
+    Touchable,
 } from "react-native";
 import Icon from 'react-native-vector-icons/AntDesign';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+
+
 const ModalEditProfile = (props) => {
 
+    const [resourcePath, setResourcePath] = useState(props.avatar);
+    const [uriAvatar,setUriAvatar] = useState(props.avatar);
     const saveInfo = () => {
         alert('Save info');
     }
     const savePassword = () => {
         alert('Save password');
+    }
+
+    const selectFile = () => {
+        launchImageLibrary({
+            mediaType: 'photo',
+        },
+            res => {
+                setResourcePath(res.assets[0].uri);
+            });
     }
 
     return (
@@ -31,15 +46,23 @@ const ModalEditProfile = (props) => {
                         <Text style={styles.modalTextTitle}>Update info</Text>
 
                         <View style={styles.formUpdateInfo}>
-                            <Image
-                                source={{ uri: props.avatar }}
-                                style={styles.avatarUser}
-                            />
+                            <View style={{ flexDirection: 'row' }}>
+                                <Image
+                                    source={{ uri: resourcePath }}
+                                    style={styles.avatarUser}
+                                />
+                                <TouchableOpacity
+                                    style={styles.touchOpenImage}
+                                    onPress={selectFile}
+                                >
+                                    <Text>Choose image</Text>
+                                </TouchableOpacity>
+                            </View>
+
                             <View style={styles.formItem}>
                                 <Text style={styles.formTextLabel}>Full Name</Text>
                                 <TextInput
                                     style={styles.inputText}
-                                    placeholder='Full Name'
                                     value={props.fullName}
                                 />
                             </View>
@@ -156,23 +179,26 @@ const styles = StyleSheet.create({
 
     },
     inputText: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
         paddingHorizontal: 15,
-        width: '60%'
+        borderWidth: 1,
+        borderColor: '#ddd',
+        backgroundColor:'#ddd',
+        borderRadius:10,
     },
     avatarUser: {
         width: 80,
         height: 80,
         borderRadius: 80,
+        borderWidth:2,
+        borderColor: '#ddd'
     },
     formItem: {
-        flexDirection: 'row',
-        marginVertical: 10
+        //flexDirection: 'row',
+        marginVertical: 5
     },
     formTextLabel: {
-        paddingTop: 20,
-        width: '30%',
+        paddingVertical:10,
+        //width: '30%',
         fontSize: 18
     },
     line: {
@@ -197,6 +223,17 @@ const styles = StyleSheet.create({
         color: '#000',
         paddingHorizontal: 15,
 
+    },
+    touchOpenImage:{
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth:1,
+        borderColor: '#ddd',
+        height:45,
+        borderRadius:5,
+        paddingHorizontal:15,
+        marginTop:16,
+        marginLeft:15,
     }
 });
 

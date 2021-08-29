@@ -18,20 +18,14 @@ export default MainScreen = ({ route }) => {
             />
         );
     }
-    const homeScreen = ({ navigation }) => {
-        return (
-            <HomeScreen
-                navigation={navigation}
-            />
-        );
-    }
+    
     
     return (
         <Stack.Navigator
         >
             <Stack.Screen
                 name="Home"
-                component={homeScreen}
+                component={HomeScreen}
                 options={{
                     header: () => null
                 }}

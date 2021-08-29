@@ -21,42 +21,63 @@ export default ChatScreen = ({ navigation, route }) => {
     const database = firebaseApp.database().ref('Users');
     const { myKey, keyFriend, fullName, avatar } = route.params;
     const [message, setMessage] = useState('');
-
+    const [data, setData] = useState([]);
+    let componentMounted = true;
     const pressBackHome = () => {
         navigation.goBack();
     }
 
     const getData = () => {
-        const tmp = [];
         database.child(myKey).child('messages').child(keyFriend)
-            .on('child_added', (data) =>
-                tmp.push({
-                    key: data.key,
-                    message: data.val().message,
-                    time: data.val().time,
-                    isFriend: data.val().isFriend
-                })
-            );
-        return tmp;
+            .on('value', (snapshot) => {
+                let tmp = [];
+                for (let [key, value] of Object.entries(snapshot.val())) {
+                    tmp.push({
+                        key: key,
+                        message: value.message,
+                        time: value.time,
+                        isFriend: value.isFriend
+                    });
+                }
+
+                setData(tmp);
+            });
     }
-    const [data, setData] = useState(getData());
-    useEffect(() => {
-        setData(getData());
-    }, [])
+
 
 
     const pressOptionDeleteMessage = (key) => {
         //console.log(key);
         Alert.alert(
-            'Warning', 'Messages are deleted only on your side.',
+            'Option', 'Delete this message',
             [
                 { text: "Cancel", cancelable: true },
                 {
-                    text: "OK", onPress: () => {
+                    text: "OK",
+                    cancelable: true,
+                    onPress: () => {
+                        confirmDeleteMessage(key);
+                    }
+                }
+            ]
+        );
+    }
+
+    const confirmDeleteMessage = (key) => {
+        Alert.alert(
+            'Confirm delete messages',
+            'This message deletes only on your side. Are you sure you want to delete ?',
+            [
+                { text: "No", cancelable: true },
+                {
+                    text: "Yes",
+                    cancelable: true,
+                    onPress: () => {
                         database.child(myKey).child('messages')
                             .child(keyFriend).child(key).remove();
+
                     },
-                    cancelable: true
+
                 }
             ]
         );
@@ -111,15 +132,30 @@ export default ChatScreen = ({ navigation, route }) => {
                 isFriend: false
             }
         );
-        database.child(keyFriend).child('messages').child(myKey).push(
-            {
-                message: message,
-                time: dateTime,
-                isFriend: true
-            }
-        );
+        if (myKey !== keyFriend)
+            database.child(keyFriend).child('messages').child(myKey).push(
+                {
+                    message: message,
+                    time: dateTime,
+                    isFriend: true
+                }
+            );
         setMessage('');
-        setData(getData());
+    }
+
+    useEffect(() => {
+        if (componentMounted) {
+            getData();
+        }
+
+        return () => {
+            componentMounted = false;
+            setData([]);
+        }
+    }, [])
+
+    const pressTextInput = () => {
+        alert('click')
     }
 
     return (
@@ -127,7 +163,7 @@ export default ChatScreen = ({ navigation, route }) => {
             <StatusBar
                 backgroundColor='#0084ff'
                 barStyle='light-content'
-                style={{zIndex:10}}
+                style={{ zIndex: 10 }}
             />
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -149,8 +185,11 @@ export default ChatScreen = ({ navigation, route }) => {
                 data={data}
                 renderItem={renderItemMessage}
                 style={styles.listMessage}
-                initialScrollIndex={(data.length - 1)}
+                // initialScrollIndex={() => {
+                //     return data.length > 0 ? data.length -1 : 0;
+                // }}
                 onContentSizeChange={onPressScrollListMessage}
+                onLayout={onPressScrollListMessage}
                 keyExtractor={item => item.key}
             />
 
@@ -160,6 +199,7 @@ export default ChatScreen = ({ navigation, route }) => {
                     placeholder='Message ...'
                     onChangeText={value => setMessage(value)}
                     value={message}
+                    onFocus={onPressScrollListMessage}
                 />
                 <TouchableOpacity
                     style={styles.touchableSend}
